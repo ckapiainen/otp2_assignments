@@ -12,7 +12,7 @@ public class BmiCalculator extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(BmiCalculator.class.getResource("bmi-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 400, 450);
-        stage.setTitle("BMI Calculator");
+        stage.setTitle("Casper K");
         stage.setScene(scene);
         stage.show();
     }
