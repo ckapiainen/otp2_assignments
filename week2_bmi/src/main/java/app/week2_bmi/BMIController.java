@@ -6,8 +6,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.Map;
 
 public class BMIController {
 
@@ -29,7 +32,11 @@ public class BMIController {
     @FXML
     private Label lblResult;
 
-    private ResourceBundle rb;
+    @FXML
+    private Label lblLocalTime;
+
+    private Map<String, String> localizedStrings;
+    private Locale currentLocale;
 
     @FXML
     public void initialize() {
@@ -37,17 +44,22 @@ public class BMIController {
     }
 
     private void setLanguage(Locale locale) {
-        try {
-            rb = ResourceBundle.getBundle("messages", locale);
+        lblResult.setText("");
+        currentLocale = locale;
+        localizedStrings = LocalizationService.getLocalizedStrings(locale);
 
-            lblWeight.setText(rb.getString("lblWeight.text"));
-            lblHeight.setText(rb.getString("lblHeight.text"));
-            btnCalculate.setText(rb.getString("btnCalculate.text"));
+        lblWeight.setText(localizedStrings.get("weight"));
+        lblHeight.setText(localizedStrings.get("height"));
+        btnCalculate.setText(localizedStrings.get("calculate"));
 
-        } catch (Exception e) {
-            lblResult.setText("Error: Language file not found for " + locale.toString());
-        }
+        displayLocalTime(locale);
+    }
 
+    private void displayLocalTime(Locale locale) {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String timeLabel = localizedStrings.get("localTime");
+        lblLocalTime.setText(timeLabel + ": " + now.format(formatter));
     }
     @FXML
     public void onENClick(ActionEvent actionEvent) {
@@ -74,17 +86,19 @@ public class BMIController {
     @FXML
     public void onCalculateClick() {
         try {
-            double weight = Double.parseDouble(txtWeight.getText().trim());
-            double height = Double.parseDouble(txtHeight.getText().trim());
-
+            double weight = Double.parseDouble(txtWeight.getText());
+            double height = Double.parseDouble(txtHeight.getText()) / 100.0;
             double bmi = weight / (height * height);
 
-            String bmiString = String.format("%.2f", bmi);
+            DecimalFormat df = new DecimalFormat("#0.00");
+            lblResult.setText(localizedStrings.getOrDefault("result", "Your BMI is") + " " + df.format(bmi));
 
-            lblResult.setText(rb.getString("lblResult.text") + " " + bmiString);
+            // Save to database
+            String language = currentLocale.getLanguage();
+            BMIResultService.saveResult(weight, height * 100, bmi, language);
 
-        } catch (Exception e) {
-            lblResult.setText(rb.getString("lblInvalid.text"));
+        } catch (NumberFormatException e) {
+            lblResult.setText(localizedStrings.getOrDefault("invalid", "Invalid input"));
         }
     }
 }

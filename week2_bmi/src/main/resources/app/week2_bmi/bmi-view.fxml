@@ -17,6 +17,7 @@
     <Button fx:id="btnCalculate" text="Calculate BMI" onAction="#onCalculateClick"
             prefWidth="150.0" />
     <Label fx:id="lblResult"/>
+    <Label fx:id="lblLocalTime"/>
 
     <Button text="EN" onAction="#onENClick" prefWidth="60.0"/>
     <Button text="FR" onAction="#onFRClick" prefWidth="60.0"/>
